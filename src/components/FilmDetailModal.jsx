@@ -9,20 +9,16 @@ function FilmDetailModal({ isLoggedIn }) {
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [error, setError] = useState(null);
-  const [showTrailer, setShowTrailer] = useState(false);
 
   useEffect(() => {
     setError(null);
     axios.get(`http://localhost:9090/api/films/${id}`)
       .then(res => setFilm(res.data))
-      .catch(err => {
-        console.error(err);
-        setError('Film bulunamadı veya yüklenemedi.');
-      });
+      .catch(() => setError('Film bulunamadı veya yüklenemedi.'));
 
     axios.get(`http://localhost:9090/api/reviews/${id}`)
       .then(res => setReviews(res.data))
-      .catch(err => console.error(err));
+      .catch(console.error);
   }, [id]);
 
   const handleSubmit = async () => {
@@ -49,125 +45,134 @@ function FilmDetailModal({ isLoggedIn }) {
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
 
-  // Rastgele info jeneratörü (film başlığına göre)
-  const randomFacts = [
-    'Bu film eleştirmenlerden tam not aldı.',
-    'Çekimleri 3 ay sürdü.',
-    'Başrol oyuncusu bu film için 10 kilo aldı.',
-    'Film, gerçek bir hikayeden uyarlandı.',
-    'Müzikleriyle ödül kazandı.',
-    'Dünya çapında büyük gişe başarısı elde etti.',
-    'Yönetmen bu filmle ilk ödülünü aldı.',
-    'Filmdeki bazı sahneler doğaçlamaydı.',
-    'Çekimler sırasında ilginç kazalar yaşandı.',
-    'Senaryosu 2 yılda tamamlandı.'
-  ];
-  function getRandomFact(title) {
-    // Her film için sabit bir info gelsin diye title hashle
-    let hash = 0;
-    for (let i = 0; i < title.length; i++) hash += title.charCodeAt(i);
-    return randomFacts[hash % randomFacts.length];
-  }
+  if (error) return <p className="text-center mt-5 text-danger fs-4">{error}</p>;
+  if (!film) return <p className="text-center mt-5 text-secondary">Yükleniyor...</p>;
 
-  if (error) return <p className="text-center mt-8 text-red-600">{error}</p>;
-  if (!film) return <p className="text-center mt-8">Yükleniyor...</p>;
-
-  // film propertylerine erişim bundan sonra
-  const description = film.description || "Ethan Hunt and team continue their search for the terrifying AI known as the Entity — which has infiltrated intelligence networks all over the globe — with the world's governments and a mysterious ghost from Hunt's past on their trail. Joined by new allies and armed with the means to shut the Entity down for good, Hunt is in a race against time to prevent the world as we know it from changing forever.";
+  const description = film.description || "Ethan Hunt and team continue their search for the terrifying AI known as the Entity...";
   const director = film.director || 'Christopher McQuarrie';
   const year = film.releaseDate ? film.releaseDate.split('-')[0] : '';
   const slogan = film.slogan || 'OUR LIVES ARE THE SUM OF OUR CHOICES.';
 
   return (
-    <div className="container mx-auto p-4" style={{ maxWidth: '1100px' }}>
-      <div className="row g-4 align-items-start">
-        {/* Poster */}
-        <div className="col-md-4 d-flex flex-column align-items-center">
-          <img src={film.poster} alt={film.title} className="rounded shadow mb-3" style={{ width: '100%', maxWidth: '320px', minWidth: '220px', objectFit: 'cover' }} />
-          {film.trailerLink && (
-            <div className="w-100 mt-3" style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.2)' }}>
+    <div className="container mt-4 mb-5" style={{ maxWidth: '1100px' }}>
+      <div className="row g-4">
+        {/* Sol Sütun: Küçük Poster */}
+        <div className="col-md-3 d-flex justify-content-center">
+          <img
+            src={film.poster}
+            alt={film.title}
+            className="rounded shadow"
+            style={{
+              maxWidth: '180px',
+              width: '100%',
+              objectFit: 'cover',
+              maxHeight: '270px',  // posterin yüksekliği sınırlandı
+              marginBottom: '20px' // alt boşluk eklendi
+            }}
+          />
+        </div>
+
+        {/* Sağ Sütun: Yazılar + Trailer */}
+        <div className="col-md-9">
+          {/* Yazılar */}
+          <h1 className="fw-bold mb-2" style={{
+            background: 'linear-gradient(to right, #e50914, #b81d24)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontSize: '2.2rem'
+          }}>{film.title}</h1>
+
+          <div className="text-muted mb-2 fs-5">
+            <span>{year}</span> • Directed by <strong className="text-primary">{director}</strong>
+          </div>
+
+          <div className="fst-italic text-uppercase text-secondary mb-3 ps-3 border-start border-danger border-3" style={{ letterSpacing: '1px' }}>
+            {slogan}
+          </div>
+
+          <div className="bg-light p-3 rounded border mb-3" style={{ fontSize: '1.05rem', lineHeight: '1.7' }}>
+            {description}
+          </div>
+
+          <div className="d-flex gap-4 mb-3">
+            <span className="text-success"><i className="bi bi-eye-fill"></i> 565K</span>
+            <span className="text-primary"><i className="bi bi-hand-thumbs-up-fill"></i> 146K</span>
+            <span className="text-danger"><i className="bi bi-heart-fill"></i> 173K</span>
+          </div>
+
+          <div className="d-flex align-items-center gap-3 mb-3">
+            <span className="fw-semibold">Puan Ortalaması:</span>
+            <span className="badge bg-warning text-dark fs-5">{averageRating}</span>
+            <span className="text-muted">{reviews.length} oy</span>
+          </div>
+
+          {/* Trailer */}
+          <div className="rounded shadow overflow-hidden" style={{ maxWidth: '100%', maxHeight: '360px' }}>
+            {film.trailerLink ? (
               <iframe
                 src={film.trailerLink.replace('watch?v=', 'embed/')}
                 title="Fragman"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                style={{ width: '100%', aspectRatio: '16/9', minHeight: '180px', border: 'none' }}
+                style={{ width: '100%', aspectRatio: '16/9', border: 'none' }}
               />
-            </div>
-          )}
-        </div>
-        {/* Film Detayları */}
-        <div className="col-md-8">
-          <h1 className="display-5 fw-bold mb-1">{film.title}</h1>
-          <div className="mb-2 text-secondary" style={{ fontSize: '1.1rem' }}>
-            <span>{year}</span>
-            {director && <span> &nbsp; Directed by <span className="fw-semibold text-primary">{director}</span></span>}
-          </div>
-          <div className="fst-italic text-uppercase text-muted mb-3" style={{ letterSpacing: '1px', fontSize: '1.05rem' }}>{slogan}</div>
-          <div className="bg-dark bg-opacity-10 rounded p-3 mb-3" style={{ fontSize: '1.08rem', lineHeight: '1.6' }}>{description}</div>
-          <div className="d-flex align-items-center gap-4 mb-3">
-            <span className="text-success"><i className="bi bi-eye-fill"></i> 565K</span>
-            <span className="text-primary"><i className="bi bi-hand-thumbs-up-fill"></i> 146K</span>
-            <span className="text-danger"><i className="bi bi-heart-fill"></i> 173K</span>
-          </div>
-          <div className="d-flex align-items-center gap-3 mb-2">
-            <span className="fw-semibold">RATINGS</span>
-            <span className="badge bg-warning text-dark" style={{ fontSize: '1.1rem' }}>{averageRating}</span>
-            <span className="text-muted" style={{ fontSize: '0.95rem' }}>{reviews.length} FANS</span>
+            ) : (
+              <p className="text-muted">Fragman bulunamadı.</p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-2">Yorumlar</h2>
+      {/* Yorumlar Bölümü */}
+      <div className="mt-5">
+        <h2 className="fs-4 fw-bold mb-3">Yorumlar</h2>
         {reviews.length === 0 ? (
-          <p>Henüz yorum yok.</p>
+          <div className="alert alert-info">Henüz yorum yapılmamış. İlk yorumu sen yap!</div>
         ) : (
-          <ul className="list-group">
+          <ul className="list-unstyled">
             {reviews.map((r, idx) => (
-              <li key={idx} className="list-group-item">
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                  <span className="fw-bold">{r.userEmail}</span>
-                  <span className="text-muted" style={{ fontSize: '0.9em' }}>{r.date ? new Date(r.date).toLocaleString('tr-TR') : ''}</span>
+              <li key={idx} className="card p-3 mb-3 shadow-sm">
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="fw-bold text-primary">{r.userEmail}</span>
+                  <span className="text-muted small">{new Date(r.date).toLocaleString('tr-TR')}</span>
                 </div>
-                <div className="mb-1">{r.content}</div>
-                <div className="text-warning">Puan: {r.rating}/5</div>
+                <p className="mb-1">{r.content}</p>
+                <div className="text-warning">⭐ {r.rating} / 5</div>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {isLoggedIn && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Yorum Yap</h2>
-          <div className="card p-3 shadow-sm mb-3">
-            <div className="mb-2">
-              <textarea
-                className="form-control mb-2"
-                value={content}
-                placeholder="Yorumunuzu yazın..."
-                onChange={(e) => setContent(e.target.value)}
-                rows={3}
-              />
-              <input
-                type="number"
-                min="1"
-                max="5"
-                className="form-control mb-2"
-                placeholder="Puan (1-5)"
-                value={rating}
-                onChange={(e) => setRating(parseInt(e.target.value))}
-              />
-            </div>
-            <button onClick={handleSubmit} className="btn btn-primary w-100">
+      {/* Yorum Yapma Bölümü */}
+      {isLoggedIn ? (
+        <div className="mt-5">
+          <h2 className="fs-4 fw-bold mb-3">Yorum Yap</h2>
+          <div className="card p-4 shadow-sm border border-primary">
+            <textarea
+              className="form-control mb-3"
+              value={content}
+              placeholder="Yorumunuzu yazın..."
+              onChange={(e) => setContent(e.target.value)}
+              rows={3}
+            />
+            <input
+              type="number"
+              min="1"
+              max="5"
+              className="form-control mb-3"
+              placeholder="Puan (1-5)"
+              value={rating}
+              onChange={(e) => setRating(parseInt(e.target.value))}
+            />
+            <button onClick={handleSubmit} className="btn btn-success w-100">
               Yorumu Gönder
             </button>
           </div>
         </div>
+      ) : (
+        <p className="text-danger mt-4">Yorum yapmak için giriş yapmalısınız.</p>
       )}
-
-      {!isLoggedIn && <p className="text-red-600 mt-4">Yorum yapmak için giriş yapmalısınız.</p>}
     </div>
   );
 }
