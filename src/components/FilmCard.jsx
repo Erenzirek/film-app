@@ -1,13 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function FilmCard({ film, isLoggedIn, onLoginRequired }) {
+  const navigate = useNavigate();
+
   const handleClick = () => {
     if (!isLoggedIn) {
       onLoginRequired();
       return;
     }
-
-    alert(`Fragman ve yorumlar açılıyor: ${film.title}`);
+    navigate(`/films/${film.imdbId}`);
   };
 
   return (
