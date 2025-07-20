@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Navbar({ onLoginClick, onRegisterClick, onLogout, isLoggedIn }) {
   return (
@@ -12,7 +13,10 @@ function Navbar({ onLoginClick, onRegisterClick, onLogout, isLoggedIn }) {
             <button className="btn btn-outline-light" onClick={onRegisterClick}>Kayıt Ol</button>
           </>
         ) : (
-          <button className="btn btn-danger" onClick={onLogout}>Çıkış</button>
+          <>
+            <Link to="/favorites" className="btn btn-warning me-2">Favori Filmlerim</Link>
+            <button className="btn btn-danger" onClick={onLogout}>Çıkış</button>
+          </>
         )}
       </div>
     </nav>
