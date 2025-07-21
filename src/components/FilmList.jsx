@@ -12,18 +12,21 @@ function FilmList({ isLoggedIn, onLoginRequired }) {
   }, []);
 
   return (
-    <div className="container mt-4">
-      <div className="row">
-        {films.map(film => (
-          <FilmCard 
-            key={film.imdbId} 
-            film={film} 
-            isLoggedIn={isLoggedIn} 
-            onLoginRequired={onLoginRequired}
-          />
-        ))}
+    <section className="film-list-section py-5">
+      <div className="container">
+        <h2 className="display-5 fw-bold mb-5 text-center text-gradient">Popüler Filmler</h2>
+        <div className="row g-4 justify-content-center">
+          {films.map(film => (
+            <FilmCard 
+              key={film.imdbId} 
+              film={film} 
+              isLoggedIn={isLoggedIn} 
+              onLoginRequired={onLoginRequired}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 

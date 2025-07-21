@@ -6,6 +6,7 @@ import FilmDetailPage from './components/FilmDetailModal'; // yeni sayfa!
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 import FavoriteFilms from './components/FavoriteFilms';
+import './index.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');

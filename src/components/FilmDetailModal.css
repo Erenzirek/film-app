@@ -1,0 +1,8 @@
+.review-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); /* açık mavi → lila */
+  border-radius: 1rem;
+  padding: 1rem;
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border: none !important;
+}
